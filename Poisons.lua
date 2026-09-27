@@ -60,6 +60,8 @@ function Poisons:Hand(hand)
         s.enchantID = plain(e.enchantID)
         s.icon = e.icon
         s.via = e.via
+        -- Only the tooltip route knows what the coating is called.
+        s.coating = e.name
     else
         s.coated = false
     end

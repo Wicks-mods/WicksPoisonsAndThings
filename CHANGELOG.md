@@ -45,7 +45,11 @@
   one call and nothing stood behind it, so on a client that does not
   have that one there was no answer at all. It now tries every shape
   the call comes in and /wpt status names which one answered, along
-  with which your client has.
+  with which your client has. On this client all three
+  are present and none of them answers, so the last fallback reads the
+  line the game writes on the weapon itself. That one also brings back
+  the poison's name, so the strip says which coating is on the blade
+  rather than only how long it has left.
 - Best carried now means best for that hand. The list was ranked on
   item level alone, and Crippling outranks Instant at several points on
   the way up, so a poison that slows kept taking a slot meant for

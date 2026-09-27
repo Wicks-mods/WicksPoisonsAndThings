@@ -269,7 +269,12 @@ local function dressBlade(btn, h, pick, warn)
     if not h.hasWeapon then
         btn.text:SetText(handName(h.hand) == "Main hand" and "Main: empty" or "Off: empty")
     elseif h.coated then
-        btn.text:SetText(("%s  %s"):format(h.hand == "main" and "Main" or "Off", clockText(h)))
+        -- Say which poison when the reading came with a name. Two
+        -- blades both reading "28m" is not as useful as knowing one of
+        -- them is Crippling.
+        local short = h.coating and h.coating:gsub("%s*Poison.*$", "") or nil
+        btn.text:SetText(("%s  %s%s"):format(h.hand == "main" and "Main" or "Off",
+            short and (short .. " ") or "", clockText(h)))
     else
         btn.text:SetText(("%s  bare"):format(h.hand == "main" and "Main" or "Off"))
     end
