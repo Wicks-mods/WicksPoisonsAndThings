@@ -1,6 +1,9 @@
 # Wick's Poisons and Things - Changelog
 
-## Unreleased
+## 0.9.1 — 2026-09-26
+
+First release on CurseForge. Everything below has been in the
+beta zip; this is it as a package.
 
 - Combo points over the target's nameplate. Off the game's own class
   resource, which only ever sits under your own plate. Toggle in options.
@@ -73,7 +76,6 @@
   damage. Instant on the main hand and Deadly on the off hand, with
   item level only settling it between two of the same kind. Pinning is
   unchanged and still wins outright.
-
 ## 0.9.0
 
 One version across the suite for the Forever beta. Every addon carried a
