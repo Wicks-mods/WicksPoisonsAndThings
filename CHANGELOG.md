@@ -41,6 +41,11 @@
   that stops a macro being rewritten mid-fight, which applies to
   neither, so the weapons moved on the key and the mark did not follow
   until the fight ended.
+- Two poisoned blades could read as bare. The coating was read through
+  one call and nothing stood behind it, so on a client that does not
+  have that one there was no answer at all. It now tries every shape
+  the call comes in and /wpt status names which one answered, along
+  with which your client has.
 
 ## 0.9.0
 

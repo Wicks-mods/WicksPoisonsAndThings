@@ -48,25 +48,20 @@ function Poisons:Hand(hand)
         local it = D.GetItemInfo(weapon)
         s.weapon = it and it.name
     end
-    if tempInfo then
-        local ok, info = pcall(tempInfo, slot)
-        if ok and type(info) == "table" then
-            s.coated = true
-            s.msLeft = plain(info.remainingTimeMs)
-            s.charges = plain(info.chargesRemaining)
-            s.enchantID = plain(info.enchantID)
-        elseif ok then
-            s.coated = false
-        end
-    end
-    if s.coated and enchInfo then
-        local ok, info = pcall(enchInfo, slot)
-        if ok and type(info) == "table" then
-            local e = info.enchants and info.enchants[1] or info
-            s.icon = e and e.enchantIconID
-            if s.msLeft == nil then s.msLeft = plain(e and e.timeLeft) end
-            if s.charges == nil then s.charges = plain(e and e.charges) end
-        end
+    -- Through Dialect, which tries every shape this call comes in. Doing
+    -- it here against one of them is how two poisoned blades read as
+    -- bare: the client did not have the call we asked for, and there
+    -- was nothing behind it.
+    local e = D.GetTempEnchant(slot)
+    if e then
+        s.coated = true
+        s.msLeft = plain(e.msLeft)
+        s.charges = plain(e.charges)
+        s.enchantID = plain(e.enchantID)
+        s.icon = e.icon
+        s.via = e.via
+    else
+        s.coated = false
     end
     return s
 end

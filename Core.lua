@@ -251,6 +251,16 @@ A:RegisterSlash(function(_, msg)
                 hand, tostring(h.weapon or "none"), tostring(h.coated),
                 h.msLeft and string.format("%.1f", h.msLeft / 60000) or "?", tostring(h.charges)))
         end
+        -- Which call the client answered to, and which it has at all.
+        -- Asked for because two poisoned blades once read as bare and
+        -- nothing in the addon could say why.
+        A:Print(("coating read via %s. available here: %s"):format(
+            tostring(s.main.via or s.off.via or "nothing answered"),
+            table.concat({
+                (C_Item and C_Item.GetWeaponEnchantInfo) and "C_Item" or nil,
+                (C_PaperDollInfo and C_PaperDollInfo.GetTemporaryEnchantmentInfo) and "C_PaperDollInfo" or nil,
+                rawget(_G, "GetWeaponEnchantInfo") and "global" or nil,
+            }, ", ")))
         A:Print(("carrying %d coating(s). main macro: %s"):format(#ns.Poisons:Available(),
             ((ns.Poisons.macro and ns.Poisons.macro.main) or ""):gsub("\n", " | ")))
         return
