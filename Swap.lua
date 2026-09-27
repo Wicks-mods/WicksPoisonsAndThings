@@ -153,8 +153,14 @@ function Swap:Text(which, pair)
     return table.concat(lines, "\n")
 end
 
--- What the strip draws: the icon of the weapon each key would put in
--- your main hand, and which of the two you are already holding there.
+-- What the strip draws. Each button rides a hand, so its icon is what
+-- is in that hand: the stealth swap sits on the main hand entry and
+-- shows your main hand. It used to show the weapon that key would put
+-- there, which read as your off hand weapon labelled Main.
+--
+-- What the button does is unchanged and fixed, because a secure macro
+-- cannot be rewritten mid-fight. The hover says what it does, since the
+-- icon no longer previews it.
 function Swap:Faces()
     local pair = self.pair
     if not pair then return nil end
@@ -162,9 +168,11 @@ function Swap:Faces()
         local info = D.GetItemInfoInstant(id)
         return info and info.icon or nil
     end
+    local inMain = pair.daggerInMain and pair.dagger or pair.other
+    local inOff  = pair.daggerInMain and pair.other or pair.dagger
     return {
-        stealth = { id = pair.dagger, icon = icon(pair.dagger), live = pair.daggerInMain },
-        strike  = { id = pair.other,  icon = icon(pair.other),  live = not pair.daggerInMain },
+        stealth = { id = inMain, icon = icon(inMain), puts = pair.dagger },
+        strike  = { id = inOff,  icon = icon(inOff),  puts = pair.other },
     }
 end
 

@@ -140,12 +140,17 @@ local function makeSwap(parent, which)
             GameTooltip:SetText("Weapon swap")
             GameTooltip:AddLine(tostring(ns.swap.why or "nothing to swap"), 0.5, 0.5, 0.5, true)
         else
-            local name = Core.Dialect.GetItemNameByID(face.id) or "that weapon"
+            -- The icon is what is in this hand, so the thing this key
+            -- would do has to be said rather than shown.
+            local here = Core.Dialect.GetItemNameByID(face.id) or "that weapon"
+            local puts = Core.Dialect.GetItemNameByID(face.puts) or "the other one"
             GameTooltip:SetText(which == "stealth" and "Stealth, dagger to main hand"
                                                     or "Strike, slow weapon back")
-            GameTooltip:AddLine(name .. " to your main hand.", 0.8, 0.8, 0.8, true)
-            if face.live then
-                GameTooltip:AddLine("Already there.", 0.5, 0.5, 0.5, true)
+            GameTooltip:AddLine("Holding " .. here .. ".", 0.83, 0.78, 0.63, true)
+            if face.puts == face.id then
+                GameTooltip:AddLine("Already the way this key wants it.", 0.5, 0.5, 0.5, true)
+            else
+                GameTooltip:AddLine("Puts " .. puts .. " in your main hand.", 0.5, 0.5, 0.5, true)
             end
             if which == "stealth" then
                 GameTooltip:AddLine("Pressed again while stealthed, it drops stealth and puts the slow weapon back. Nothing moves in combat.",

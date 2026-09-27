@@ -60,7 +60,12 @@
 - The strip is two halves rather than three parts. Each swap button
   rides the hand it belongs to instead of sitting in a block of its
   own, and the coating's name is on the hover rather than the strip,
-  where it truncated to three letters on both blades.
+  where it truncated to three letters on both blades. Each swap icon
+  shows the weapon in the hand it sits on, rather than the one that key
+  would put in your main hand, which read as your off hand weapon
+  labelled Main. The fel edge went with it: it marked the weapon you
+  were already holding, and every icon is now that by definition. What
+  the key does is on the hover.
 - Best carried now means best for that hand. The list was ranked on
   item level alone, and Crippling outranks Instant at several points on
   the way up, so a poison that slows kept taking a slot meant for
