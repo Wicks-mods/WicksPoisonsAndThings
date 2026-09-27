@@ -160,7 +160,11 @@ function A:OnEnable()
             function(v) db.stripLocked = v end, y)
         y = O:Note(page, "One row: each blade's coating and how long it has left. Click a blade to recoat, right-click for the full panel.", y)
         y = O:Heading(page, "Coatings", y - 6)
-        y = O:Note(page, ("Warn under %d minutes. Change it with /wpt warn <minutes>. Pin a poison per hand with /wpt pin main <item link>."):format(db.warnMinutes or 5), y)
+        y = O:Stepper(page, "Warn under this many minutes",
+            function() return db.warnMinutes or 5 end,
+            function(v) db.warnMinutes = v; if ns.UI then ns.UI:Refresh() end end,
+            y, { min = 1, max = 60, step = 1 })
+        y = O:Note(page, "Pin a coating to a hand by clicking it under In your bags on the poison panel. Left-click for the main hand, right-click for the off hand, click again to let go.", y)
         y = O:Button(page, "Open panel", function() ns.UI:Toggle() end, y, 100)
         y = O:Button(page, "Open kit", function() addon.kit:Toggle() end, y, 100)
         if ns.combo then y = ns.combo:OptionRow(page, y - 6) end

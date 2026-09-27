@@ -163,6 +163,31 @@ function Poisons:ChoiceFor(hand)
     return best and best.entry or list[1]
 end
 
+-- Pinning, as one operation rather than as something the slash command
+-- and the panel each work out for themselves. Clicking the hand a
+-- poison is already pinned to lets go of it.
+function Poisons:TogglePin(hand, itemID)
+    local db = ns.db and ns.db.profile
+    if not db or not itemID then return end
+    db.pinned = db.pinned or {}
+    if db.pinned[hand] == itemID then
+        db.pinned[hand] = nil
+    else
+        db.pinned[hand] = itemID
+    end
+    self:UpdateMacros()
+    return db.pinned[hand]
+end
+
+function Poisons:PinnedTo(itemID)
+    local db = ns.db and ns.db.profile
+    local p = db and db.pinned or {}
+    local hands = {}
+    if p.main == itemID then hands[#hands + 1] = "main" end
+    if p.off == itemID then hands[#hands + 1] = "off" end
+    return hands
+end
+
 -- ============================================================
 -- Coating keys
 -- ============================================================

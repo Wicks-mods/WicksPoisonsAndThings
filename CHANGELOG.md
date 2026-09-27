@@ -50,6 +50,17 @@
   line the game writes on the weapon itself. That one also brings back
   the poison's name, so the strip says which coating is on the blade
   rather than only how long it has left.
+- Pin a coating by clicking it. The panel lists what you carry as icons
+  now: left-click pins one to your main hand, right-click to the off
+  hand, click again to let go, and the hand it is pinned to is marked
+  on the icon. Switching coating used to mean shift-clicking the item
+  into chat and typing a command at it.
+- The warning threshold is a stepper on the options page rather than
+  /wpt warn <minutes>.
+- The strip is two halves rather than three parts. Each swap button
+  rides the hand it belongs to instead of sitting in a block of its
+  own, and the coating's name is on the hover rather than the strip,
+  where it truncated to three letters on both blades.
 - Best carried now means best for that hand. The list was ranked on
   item level alone, and Crippling outranks Instant at several points on
   the way up, so a poison that slows kept taking a slot meant for

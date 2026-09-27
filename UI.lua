@@ -53,7 +53,10 @@ local function handLines(tt, h, pick, warnMinutes)
     if h.coated then
         local m = minutesLeft(h)
         local c = handColor(h, warnMinutes)
-        tt:AddLine(m and ("Coated, %d minutes left"):format(math.floor(m)) or "Coated", c[1], c[2], c[3])
+        -- Which coating, here rather than on the strip, where it
+        -- truncated to three letters on both blades.
+        tt:AddLine(m and ("%s, %d minutes left"):format(h.coating or "Coated", math.floor(m))
+            or (h.coating or "Coated"), c[1], c[2], c[3])
         if h.charges then tt:AddLine(("%d charges"):format(h.charges), 0.83, 0.78, 0.63) end
     else
         tt:AddLine("Not coated", RED[1], RED[2], RED[3])
@@ -72,7 +75,10 @@ end
 -- ============================================================
 
 local STRIP_H = 26
-local HAND_W  = 92
+-- The hand gives its right end to the swap button that belongs to it,
+-- so the text has that much less. It only carries "Main 23m" now.
+local SWAP_W  = STRIP_H - 4
+local HAND_W  = 76 + SWAP_W
 local PAD     = 6
 
 local function makeBlade(parent, hand, strip)
@@ -86,7 +92,7 @@ local function makeBlade(parent, hand, strip)
     b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     b.text = Chrome:Text(b, 11)
     b.text:SetPoint("LEFT", b.icon, "RIGHT", 5, 0)
-    b.text:SetPoint("RIGHT", -3, 0)
+    b.text:SetPoint("RIGHT", -(SWAP_W + 5), 0)
     b.text:SetJustifyH("LEFT")
     b.text:SetWordWrap(false)
     b.hl = b:CreateTexture(nil, "HIGHLIGHT")
@@ -166,13 +172,13 @@ function UI:BuildStrip()
     local db = ns.db and ns.db.profile
     local f = CreateFrame("Frame", "WicksPoisonsStrip", UIParent)
     self.strip = f
-    -- The swap block is a rogue thing and an optional one, so the strip
-    -- is only as wide as it has something to put there. Width is settled
-    -- at build time: a protected child cannot be shown, hidden or
-    -- re-anchored in a fight, so nothing here moves once it is up.
-    local swapW = (ns.swap and ns.swap:Shown()) and (1 + SWAP_W * 2 + 2) or 0
-    f.swapW = swapW
-    f:SetSize(PAD + HAND_W * 2 + 3 + swapW + PAD, STRIP_H)
+    -- Each swap button rides the hand it belongs to, inside that hand's
+    -- width, so the strip is the two hands and nothing else. Width is
+    -- settled at build time: a protected child cannot be shown, hidden
+    -- or re-anchored in a fight, so nothing here moves once it is up.
+    local withSwap = (ns.swap and ns.swap:Shown()) and true or false
+    f.withSwap = withSwap
+    f:SetSize(PAD + HAND_W * 2 + 3 + PAD, STRIP_H)
     f:SetPoint("CENTER", 0, -250)
     f:SetFrameStrata("MEDIUM")
     f:SetMovable(true)
@@ -213,14 +219,20 @@ function UI:BuildStrip()
     f.offBtn = makeBlade(f, "off", f)
     f.offBtn:SetPoint("LEFT", mid, "RIGHT", 1, 0)
 
-    if swapW > 0 then
-        local sdiv = CreateFrame("Frame", nil, f)
-        sdiv:SetPoint("LEFT", f.offBtn, "RIGHT", 1, 0); sdiv:SetSize(1, STRIP_H - 6)
-        local sd = Chrome:Texture(sdiv, "ARTWORK", C.border); sd:SetAllPoints()
+    if withSwap then
+        -- The stealth swap is the one that fills your main hand, so it
+        -- rides the main hand. The strike swap fills it back, and rides
+        -- the off hand. Each sits at the right end of its own entry.
         f.swapStealth = makeSwap(f, "stealth")
-        f.swapStealth:SetPoint("LEFT", sdiv, "RIGHT", 1, 0)
+        f.swapStealth:SetPoint("RIGHT", f.mainBtn, "RIGHT", -1, 0)
         f.swapStrike = makeSwap(f, "strike")
-        f.swapStrike:SetPoint("LEFT", f.swapStealth, "RIGHT", 1, 0)
+        f.swapStrike:SetPoint("RIGHT", f.offBtn, "RIGHT", -1, 0)
+        -- Each one sits on top of the blade it rides, and both are
+        -- buttons, so say which gets the click rather than leaving it
+        -- to the order they happened to be created in.
+        for _, b in ipairs({ f.swapStealth, f.swapStrike }) do
+            b:SetFrameLevel((f.mainBtn:GetFrameLevel() or 1) + 2)
+        end
     end
 
     f:SetScript("OnShow", function() UI:RefreshStrip() end)
@@ -269,12 +281,10 @@ local function dressBlade(btn, h, pick, warn)
     if not h.hasWeapon then
         btn.text:SetText(handName(h.hand) == "Main hand" and "Main: empty" or "Off: empty")
     elseif h.coated then
-        -- Say which poison when the reading came with a name. Two
-        -- blades both reading "28m" is not as useful as knowing one of
-        -- them is Crippling.
-        local short = h.coating and h.coating:gsub("%s*Poison.*$", "") or nil
-        btn.text:SetText(("%s  %s%s"):format(h.hand == "main" and "Main" or "Off",
-            short and (short .. " ") or "", clockText(h)))
+        -- The name went in and came straight back out: at this width it
+        -- truncated to "Ins..." on both blades, which is worse than not
+        -- saying. It is on the hover instead.
+        btn.text:SetText(("%s  %s"):format(h.hand == "main" and "Main" or "Off", clockText(h)))
     else
         btn.text:SetText(("%s  bare"):format(h.hand == "main" and "Main" or "Off"))
     end
@@ -344,6 +354,53 @@ function UI:Build()
     y = y - 4
     local shead = Chrome:Heading(ct, "In your bags"); shead:SetPoint("TOPLEFT", 0, y)
     y = y - 20
+    -- Icons rather than a sentence. Switching coating used to mean
+    -- shift-clicking the item into chat and typing a command at it,
+    -- while this list sat here naming the thing you wanted and
+    -- refusing to be clicked.
+    p.stockBtns = {}
+    for i = 1, 10 do
+        local b = CreateFrame("Button", nil, ct)
+        b:SetSize(26, 26)
+        b:SetPoint("TOPLEFT", (i - 1) * 30, y)
+        b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+        b.icon = b:CreateTexture(nil, "ARTWORK")
+        b.icon:SetPoint("TOPLEFT", 1, -1)
+        b.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+        b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        Chrome:AddBorder(b)
+        b.count = Chrome:Text(b, 9, C.text)
+        b.count:SetPoint("BOTTOMRIGHT", -1, 1)
+        -- Which hand's key will use it, said on the icon.
+        b.mark = Chrome:Text(b, 9, C.fel)
+        b.mark:SetPoint("TOPLEFT", 2, -1)
+        b.hl = b:CreateTexture(nil, "HIGHLIGHT")
+        b.hl:SetAllPoints()
+        b.hl:SetColorTexture(1, 1, 1, 0.12)
+        b:SetScript("OnClick", function(s, button)
+            if not s.itemID then return end
+            ns.Poisons:TogglePin(button == "RightButton" and "off" or "main", s.itemID)
+            UI:Refresh()
+        end)
+        b:SetScript("OnEnter", function(s)
+            if not s.itemID then return end
+            GameTooltip:SetOwner(s, "ANCHOR_TOP")
+            GameTooltip:SetHyperlink("item:" .. s.itemID)
+            GameTooltip:AddLine(" ")
+            local on = ns.Poisons:PinnedTo(s.itemID)
+            if #on > 0 then
+                GameTooltip:AddLine("Pinned to your " .. table.concat(on, " and ")
+                    .. " hand. Click again to let go.", 0.31, 0.78, 0.47, true)
+            else
+                GameTooltip:AddLine("Click to pin to your main hand, right-click for the off hand.",
+                    0.5, 0.5, 0.5, true)
+            end
+            GameTooltip:Show()
+        end)
+        b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        b:Hide()
+        p.stockBtns[i] = b
+    end
     p.stock = Chrome:Text(ct, 11, C.muted)
     p.stock:SetPoint("TOPLEFT", 0, y)
     p.stock:SetWidth(300)
@@ -403,15 +460,23 @@ function UI:RefreshPanel()
         end
     end
     local list = ns.Poisons:Available()
-    if #list == 0 then
-        p.stock:SetText("No coatings carried.")
-    else
-        local parts = {}
-        for i, it in ipairs(list) do
-            if i > 6 then parts[#parts + 1] = ("and %d more"):format(#list - 6) break end
-            parts[#parts + 1] = ("%s x%d"):format(it.name, it.count or 0)
+    p.stock:SetText(#list == 0 and "No coatings carried." or "")
+    for i, b in ipairs(p.stockBtns) do
+        local it = list[i]
+        if it then
+            b.itemID = it.itemID
+            b.icon:SetTexture(it.icon or BLANK)
+            b.count:SetText(it.count and it.count > 1 and tostring(it.count) or "")
+            local on = ns.Poisons:PinnedTo(it.itemID)
+            -- M, O, or both: which key reaches for this one.
+            b.mark:SetText(#on == 0 and "" or
+                (#on == 2 and "MO" or (on[1] == "main" and "M" or "O")))
+            b.icon:SetDesaturated(false)
+            b:Show()
+        else
+            b.itemID = nil
+            b:Hide()
         end
-        p.stock:SetText(table.concat(parts, ", "))
     end
 end
 
