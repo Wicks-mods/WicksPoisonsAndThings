@@ -1,3 +1,5 @@
+<p align="center"><img src="images/wick-thumb-poisons.png" alt="Wick's Poisons and Things"></p>
+
 # Wick's Poisons and Things
 
 > Rogue loadout kit for World of Warcraft: Forever. Poison watch with one-key coating, talents, pre-pull checklist, racials.
