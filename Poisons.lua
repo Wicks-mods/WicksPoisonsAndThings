@@ -112,8 +112,36 @@ function Poisons:Available()
     return list
 end
 
--- The coating a hand's key will apply: the pinned one while it is carried,
--- otherwise the highest the player has.
+-- What a hand wants when you have not said. Instant on the main hand
+-- and Deadly on the off hand is what the two slots are for; a poison
+-- that slows or blinds is a thing you choose deliberately and never a
+-- default. Ranked by item level alone, Crippling outranks Instant at
+-- several points on the way up and kept winning a slot meant for
+-- damage.
+local UTILITY = 8
+local KIND = {
+    main = { instant = 1, deadly = 2, wound = 3 },
+    off  = { deadly = 1, instant = 2, wound = 3 },
+}
+-- Named rather than inferred: these are the ones that are not damage.
+local NOT_DAMAGE = { crippling = true, ["mind%-numbing"] = true,
+                     numbing = true, anesthetic = true, blinding = true }
+
+function Poisons:Rank(entry, hand)
+    local name = (entry.name or ""):lower()
+    for word in pairs(NOT_DAMAGE) do
+        if name:find(word) then return UTILITY end
+    end
+    for word, at in pairs(KIND[hand] or KIND.main) do
+        if name:find(word, 1, true) then return at end
+    end
+    -- A coating this list has never met: better than one we know is
+    -- utility, worse than one we know is damage.
+    return UTILITY - 1
+end
+
+-- The coating a hand's key will apply: the pinned one while it is
+-- carried, otherwise the best kind for that hand and the highest of it.
 function Poisons:ChoiceFor(hand)
     local list = self:Available()
     if #list == 0 then return nil end
@@ -122,7 +150,15 @@ function Poisons:ChoiceFor(hand)
     if pinned then
         for _, p in ipairs(list) do if p.itemID == pinned then p.pinned = true; return p end end
     end
-    return list[1]
+    local best
+    for _, p in ipairs(list) do
+        local r = self:Rank(p, hand)
+        if not best or r < best.rank
+           or (r == best.rank and p.itemLevel > best.entry.itemLevel) then
+            best = { rank = r, entry = p }
+        end
+    end
+    return best and best.entry or list[1]
 end
 
 -- ============================================================

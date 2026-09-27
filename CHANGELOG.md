@@ -46,6 +46,12 @@
   have that one there was no answer at all. It now tries every shape
   the call comes in and /wpt status names which one answered, along
   with which your client has.
+- Best carried now means best for that hand. The list was ranked on
+  item level alone, and Crippling outranks Instant at several points on
+  the way up, so a poison that slows kept taking a slot meant for
+  damage. Instant on the main hand and Deadly on the off hand, with
+  item level only settling it between two of the same kind. Pinning is
+  unchanged and still wins outright.
 
 ## 0.9.0
 
