@@ -61,6 +61,12 @@
   truncated to three letters on both blades. The swap buttons keep
   their block on the right: riding the hands put a secure button on top
   of a secure button and the press stopped swapping anything.
+- The swap keys work at login without equipping something by hand
+  first. They were written once at load, before the client could say
+  what was in your hands, and nothing re-ran until your gear changed.
+  They now fill in as the gear arrives and as the client gets round to
+  describing it, and look again a few times while there is still
+  nothing to look at.
 - Best carried now means best for that hand. The list was ranked on
   item level alone, and Crippling outranks Instant at several points on
   the way up, so a poison that slows kept taking a slot meant for

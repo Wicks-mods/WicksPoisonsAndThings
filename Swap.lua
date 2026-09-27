@@ -219,6 +219,18 @@ function Swap:Update()
     if ns.UI and ns.UI.Refresh then ns.UI:Refresh() end
 end
 
+-- Look again in a moment, while there is still nothing to look at.
+-- None of the events above is promised to arrive after the one read
+-- that failed, so the keys would stay empty on a quiet login.
+function Swap:Retry(left)
+    left = left or 6
+    self:Update()
+    if self.pair or left <= 0 then return end
+    if C_Timer and C_Timer.After then
+        C_Timer.After(1, function() Swap:Retry(left - 1) end)
+    end
+end
+
 function Swap:Init()
     if not ns.isRogue or self.inited then return end
     self.inited = true
@@ -235,16 +247,32 @@ function Swap:Init()
     end
 
     ns.RegisterEvents({ "PLAYER_EQUIPMENT_CHANGED", "PLAYER_ENTERING_WORLD",
-                        "PLAYER_REGEN_ENABLED", "SPELL_UPDATE_COOLDOWN" })
+                        "PLAYER_REGEN_ENABLED", "SPELL_UPDATE_COOLDOWN",
+                        -- Equipment arriving, as against equipment
+                        -- changing. At login the second never fires and
+                        -- the keys sat empty until something was
+                        -- equipped by hand.
+                        "UNIT_INVENTORY_CHANGED",
+                        -- Which hand holds the dagger needs the item
+                        -- described, and that lands separately.
+                        "GET_ITEM_INFO_RECEIVED" })
     ns:On("PLAYER_EQUIPMENT_CHANGED", function() Swap:Update() end)
-    ns:On("PLAYER_ENTERING_WORLD", function() Swap:Update() end)
+    ns:On("PLAYER_ENTERING_WORLD", function() Swap:Retry() end)
+    ns:On("UNIT_INVENTORY_CHANGED", function(_, unit)
+        if unit == nil or unit == "player" then Swap:Update() end
+    end)
+    ns:On("GET_ITEM_INFO_RECEIVED", function()
+        -- Only while there is nothing to write. This one fires for
+        -- every item the client gets round to describing.
+        if not Swap.pair then Swap:Update() end
+    end)
     ns:On("PLAYER_REGEN_ENABLED", function() if pending then Swap:Update() end end)
     -- This one fires constantly, so it only does the work when the
     -- answer has actually turned over.
     ns:On("SPELL_UPDATE_COOLDOWN", function()
         if Swap:StealthReady() ~= Swap.stealthReady then Swap:Update() end
     end)
-    self:Update()
+    self:Retry()
 end
 
 -- ============================================================
