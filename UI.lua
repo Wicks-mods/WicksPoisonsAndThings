@@ -75,10 +75,8 @@ end
 -- ============================================================
 
 local STRIP_H = 26
--- The hand gives its right end to the swap button that belongs to it,
--- so the text has that much less. It only carries "Main 23m" now.
 local SWAP_W  = STRIP_H - 4
-local HAND_W  = 76 + SWAP_W
+local HAND_W  = 92
 local PAD     = 6
 
 local function makeBlade(parent, hand, strip)
@@ -92,7 +90,7 @@ local function makeBlade(parent, hand, strip)
     b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     b.text = Chrome:Text(b, 11)
     b.text:SetPoint("LEFT", b.icon, "RIGHT", 5, 0)
-    b.text:SetPoint("RIGHT", -(SWAP_W + 5), 0)
+    b.text:SetPoint("RIGHT", -3, 0)
     b.text:SetJustifyH("LEFT")
     b.text:SetWordWrap(false)
     b.hl = b:CreateTexture(nil, "HIGHLIGHT")
@@ -111,8 +109,6 @@ end
 -- Each of the two swap keys, as a button on the strip. The icon is the
 -- weapon that key puts in your main hand, so the one you are not
 -- holding is the one worth pressing.
-local SWAP_W = STRIP_H - 4
-
 local function makeSwap(parent, which)
     local b = CreateFrame("Button", nil, parent, "SecureActionButtonTemplate")
     b:SetSize(SWAP_W, SWAP_W)
@@ -140,17 +136,12 @@ local function makeSwap(parent, which)
             GameTooltip:SetText("Weapon swap")
             GameTooltip:AddLine(tostring(ns.swap.why or "nothing to swap"), 0.5, 0.5, 0.5, true)
         else
-            -- The icon is what is in this hand, so the thing this key
-            -- would do has to be said rather than shown.
-            local here = Core.Dialect.GetItemNameByID(face.id) or "that weapon"
-            local puts = Core.Dialect.GetItemNameByID(face.puts) or "the other one"
+            local name = Core.Dialect.GetItemNameByID(face.id) or "that weapon"
             GameTooltip:SetText(which == "stealth" and "Stealth, dagger to main hand"
                                                     or "Strike, slow weapon back")
-            GameTooltip:AddLine("Holding " .. here .. ".", 0.83, 0.78, 0.63, true)
-            if face.puts == face.id then
-                GameTooltip:AddLine("Already the way this key wants it.", 0.5, 0.5, 0.5, true)
-            else
-                GameTooltip:AddLine("Puts " .. puts .. " in your main hand.", 0.5, 0.5, 0.5, true)
+            GameTooltip:AddLine(name .. " to your main hand.", 0.8, 0.8, 0.8, true)
+            if face.live then
+                GameTooltip:AddLine("Already there.", 0.5, 0.5, 0.5, true)
             end
             if which == "stealth" then
                 GameTooltip:AddLine("Pressed again while stealthed, it drops stealth and puts the slow weapon back. Nothing moves in combat.",
@@ -177,13 +168,14 @@ function UI:BuildStrip()
     local db = ns.db and ns.db.profile
     local f = CreateFrame("Frame", "WicksPoisonsStrip", UIParent)
     self.strip = f
-    -- Each swap button rides the hand it belongs to, inside that hand's
-    -- width, so the strip is the two hands and nothing else. Width is
-    -- settled at build time: a protected child cannot be shown, hidden
-    -- or re-anchored in a fight, so nothing here moves once it is up.
-    local withSwap = (ns.swap and ns.swap:Shown()) and true or false
-    f.withSwap = withSwap
-    f:SetSize(PAD + HAND_W * 2 + 3 + PAD, STRIP_H)
+    -- A block of its own on the right. Riding the hands put a secure
+    -- button on top of a secure button and the press stopped swapping
+    -- anything, whatever the frame levels said. Width is settled at
+    -- build time: a protected child cannot be shown, hidden or
+    -- re-anchored in a fight, so nothing here moves once it is up.
+    local swapW = (ns.swap and ns.swap:Shown()) and (1 + SWAP_W * 2 + 2) or 0
+    f.swapW = swapW
+    f:SetSize(PAD + HAND_W * 2 + 3 + swapW + PAD, STRIP_H)
     f:SetPoint("CENTER", 0, -250)
     f:SetFrameStrata("MEDIUM")
     f:SetMovable(true)
@@ -224,20 +216,14 @@ function UI:BuildStrip()
     f.offBtn = makeBlade(f, "off", f)
     f.offBtn:SetPoint("LEFT", mid, "RIGHT", 1, 0)
 
-    if withSwap then
-        -- The stealth swap is the one that fills your main hand, so it
-        -- rides the main hand. The strike swap fills it back, and rides
-        -- the off hand. Each sits at the right end of its own entry.
+    if swapW > 0 then
+        local sdiv = CreateFrame("Frame", nil, f)
+        sdiv:SetPoint("LEFT", f.offBtn, "RIGHT", 1, 0); sdiv:SetSize(1, STRIP_H - 6)
+        local sd = Chrome:Texture(sdiv, "ARTWORK", C.border); sd:SetAllPoints()
         f.swapStealth = makeSwap(f, "stealth")
-        f.swapStealth:SetPoint("RIGHT", f.mainBtn, "RIGHT", -1, 0)
+        f.swapStealth:SetPoint("LEFT", sdiv, "RIGHT", 1, 0)
         f.swapStrike = makeSwap(f, "strike")
-        f.swapStrike:SetPoint("RIGHT", f.offBtn, "RIGHT", -1, 0)
-        -- Each one sits on top of the blade it rides, and both are
-        -- buttons, so say which gets the click rather than leaving it
-        -- to the order they happened to be created in.
-        for _, b in ipairs({ f.swapStealth, f.swapStrike }) do
-            b:SetFrameLevel((f.mainBtn:GetFrameLevel() or 1) + 2)
-        end
+        f.swapStrike:SetPoint("LEFT", f.swapStealth, "RIGHT", 1, 0)
     end
 
     f:SetScript("OnShow", function() UI:RefreshStrip() end)
