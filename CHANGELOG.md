@@ -34,25 +34,27 @@ beta zip; this is it as a package.
   strike key leaves your hands alone while you are stealthed, so a
   press from stealth can no longer strip the dagger you were opening
   with.
-- And it waits for Stealth's cooldown. A macro cannot ask about one, so
-  while Stealth is down the lines that would put the dagger up are left
-  out of the macro entirely, rather than swapping your weapons for a
-  cast that goes nowhere. Getting back out of stealth still works, since
-  a cooldown should not be able to strand you holding the wrong blade.
+- The stealth key stays put while Stealth is on cooldown. A macro cannot
+  ask about one, so while Stealth is down the lines that would put the
+  dagger up are left out of the macro entirely, rather than swapping
+  your weapons for a cast that goes nowhere. Getting back out of stealth
+  still works, since a cooldown should not be able to strand you holding
+  the wrong blade.
 - The mark on the strip keeps up with a swap made in combat. Reading
   which hand holds what and redrawing the strip sat behind the guard
   that stops a macro being rewritten mid-fight, which applies to
   neither, so the weapons moved on the key and the mark did not follow
   until the fight ended.
-- Two poisoned blades could read as bare. The coating was read through
-  one call and nothing stood behind it, so on a client that does not
-  have that one there was no answer at all. It now tries every shape
-  the call comes in and /wpt status names which one answered, along
-  with which your client has. On this client all three
-  are present and none of them answers, so the last fallback reads the
-  line the game writes on the weapon itself. That one also brings back
-  the poison's name, so the strip says which coating is on the blade
-  rather than only how long it has left.
+- Your coatings are read whatever the client will answer to. They could
+  show as bare on both blades with poison on both: the reading went
+  through one call and nothing stood behind it, so on a client that does
+  not have that one there was no answer at all. It tries every shape the
+  call comes in now, and /wpt status names which one answered along with
+  which your client has. On this client all three are present and none
+  of them answers, so the last fallback reads the line the game writes
+  on the weapon itself. That one also brings back the poison's name, so
+  the strip says which coating is on the blade rather than only how long
+  it has left.
 - Pin a coating by clicking it. The panel lists what you carry as icons
   now: left-click pins one to your main hand, right-click to the off
   hand, click again to let go, and the hand it is pinned to is marked
