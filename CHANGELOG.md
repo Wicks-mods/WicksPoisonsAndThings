@@ -1,5 +1,9 @@
 # Wick's Poisons and Things - Changelog
 
+## Unreleased
+
+- The coating warning on the options page can no longer be stepped below 1 minute or above 60.
+
 ## 0.9.2 (2026-11-15)
 
 - Shows in the game's addon list with an icon and the two-tone Wick title, under a Wick's Mods heading.

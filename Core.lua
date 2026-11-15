@@ -162,7 +162,8 @@ function A:OnEnable()
         y = O:Heading(page, "Coatings", y - 6)
         y = O:Stepper(page, "Warn under this many minutes",
             function() return db.warnMinutes or 5 end,
-            function(v) db.warnMinutes = v; if ns.UI then ns.UI:Refresh() end end,
+            -- The stepper only asks; the limits are kept here.
+            function(v) db.warnMinutes = math.max(1, math.min(60, v)); if ns.UI then ns.UI:Refresh() end end,
             y, { min = 1, max = 60, step = 1 })
         y = O:Note(page, "Pin a coating to a hand by clicking it under In your bags on the poison panel. Left-click for the main hand, right-click for the off hand, click again to let go.", y)
         y = O:Button(page, "Open panel", function() ns.UI:Toggle() end, y, 100)
