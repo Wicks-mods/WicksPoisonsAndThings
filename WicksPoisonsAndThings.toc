@@ -1,11 +1,15 @@
 ## Interface: 16001
-## Title: Wick's Poisons and Things
+## Title: |cffD4C8A1Wick's|r |cff4FC778Poisons and Things|r
 ## Notes: Rogue loadout kit for World of Warcraft: Forever. Poison watch with one-key coating, talents, pre-pull checklist, racials.
 ## Author: Wick
 ## Version: 0.9.1
 ## OptionalDeps: WickCore
 ## SavedVariables: WicksPoisonsSaved
+## IconTexture: Interface\Icons\Ability_Poisons
+## Category: Wick's Mods
 ## X-Website: https://wicksmods.com
+## X-License: MIT with trademark carve-out
+## X-Curse-Project-ID: 1713442
 ## X-WickCore: WickCore-1.0
 
 Core.lua

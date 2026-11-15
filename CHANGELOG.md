@@ -1,6 +1,10 @@
 # Wick's Poisons and Things - Changelog
 
-## 0.9.1 — 2026-09-26
+## Unreleased
+
+- Shows in the game's addon list with an icon and the two-tone Wick title, under a Wick's Mods heading.
+
+## 0.9.1 (2026-09-26)
 
 First release on CurseForge. Everything below has been in the
 beta zip; this is it as a package.
