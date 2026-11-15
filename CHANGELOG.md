@@ -1,6 +1,6 @@
 # Wick's Poisons and Things - Changelog
 
-## Unreleased
+## 0.9.3 (2026-11-15)
 
 - The coating warning on the options page can no longer be stepped below 1 minute or above 60.
 
